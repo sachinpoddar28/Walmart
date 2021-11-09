@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="86871060-86da-48a5-a6de-10df312c8317" >
+		<db:my-sql-connection host="${sql.host}" port="${sql.port}" user="${sql.user}" password="${sql.pass}" database="${sql.db}" />
+	</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="e60b7ebb-8ca4-452f-a5e6-0e08c4cf903c" file="config.yaml" />
+	<flow name="addStoreFlow" doc:id="7fbb7e58-bfff-4270-875d-348e7617df47" >
+		<http:listener doc:name="Listener" doc:id="e9fbbb8f-3e0a-4890-8aa0-c49ca7cfe782" config-ref="walmart-httpListenerConfig" path="/api/addStore" allowedMethods="POST"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0dd92373-50fa-4c52-a8a6-1f0bfd3c2343" message="#[payload]"/>
+		<db:insert doc:name="Insert" doc:id="e2c666bd-a419-4948-890f-17f761087eb8" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO order_details VALUES (:order_id, :store_id, :store_name, :store_address, :store_distance, :store_contact_number, :product_type_id, :quantity)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+  "order_id" : payload.order_id,
+  "store_id" : payload.store_id,
+  "store_name" : payload.store_name,
+  "store_address" : payload.store_address,
+  "store_distance" : payload.store_distance,
+  "store_contact_number" : payload.store_contact_number,
+  "product_type_id" : payload.product_type_id,
+  "quantity" : payload.quantity
+}]]]></db:input-parameters>
+		</db:insert>
+		<set-payload value='#["Values inserted successfully. Your UID is 1"]' doc:name="Set Payload" doc:id="d89b5872-a543-4b23-a67c-ae7dcf3afbb5" />
+		<logger level="INFO" doc:name="Logger" doc:id="fd2f4b3c-6ffa-4c9f-908c-9f6259049dda" />
+	</flow>
+</mule>

@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+    <http:listener-config name="walmart-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="walmart-config" api="walmart.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="walmart-main">
+        <http:listener config-ref="walmart-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="walmart-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="77b5504d-35f1-4edf-8247-6a61ea237fdf" type="APP:INCORRECT_ORDER">
+				<ee:transform doc:name="Transform Message" doc:id="81f13727-eb19-4382-8672-7cf21e86e32f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="walmart-console">
+        <http:listener config-ref="walmart-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="walmart-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\departments\list:walmart-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  departments: [
+    "Grocerry", 
+    "Hair Care", 
+    "Skin Care", 
+    "Teeth Care", 
+    "Medicines", 
+    "Electronics"
+  ]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\products\get-description:walmart-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  productDescription: "Get pearly white teeth with this Pepsodent 2 in 1 Toothpaste. It helps fight tooth cavities and decay with the specially designed formula of this toothpaste. The protective elements in this toothpaste help prevent plaque formation and gum sensitivity."
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\products\get-details:walmart-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    usItemId: 1,
+    item_name: "Colgate Maxfresh Toothpaste",
+    item_type: "Teeth Care",
+    item_mrp: 120,
+    item_return: false
+  }, 
+  {
+    usItemId: 2,
+    item_name: "Pepsodant Maxfresh Toothpaste",
+    item_type: "Teeth Care",
+    item_mrp: 125,
+    item_return: false
+  }
+]]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<set-variable value="#[attributes.queryParams.usItemId as Number]" doc:name="usItemId" doc:id="4d504194-97b2-4d55-866e-ab61927536c5" variableName="usItemId"/>
+		<validation:is-true doc:name="Is true" doc:id="1c15bb8f-964d-46aa-96b2-b105647e3b1b" expression="#[[1,2] contains vars.usItemId]" message="No product found with this order id">
+			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:INCORRECT_ORDER" />
+		</validation:is-true>
+		<ee:transform doc:name="Transform Message" doc:id="dca5fc75-8684-4ae0-8f50-76a786f17215" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter ($.usItemId == vars.usItemId)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e447e872-2bf8-4859-91c1-ef6f99764bad" message="#[payload]"/>
+    </flow>
+    <flow name="get:\products\get-return-policy:walmart-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  noOfDays: 30,
+  condition: "There should be barcode and stickers attached with the product"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\products\list:walmart-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  products: [
+    "TV", 
+    "Mobile", 
+    "Fridge", 
+    "Wheat", 
+    "Flour", 
+    "Rice", 
+    "Toothpaste"
+  ]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\reviews\list:walmart-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  CustomerReviews: [
+    {
+      name: "Sachin",
+      star_rating: 4.25,
+      title: "Good Product",
+      description: "Very good product"
+    }, 
+    {
+      name: "Vivek",
+      star_rating: 4.25,
+      title: "Good Product",
+      description: "Very good product"
+    }
+  ],
+  average_rating: 4.25
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\stores\list:walmart-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    store_id: 1,
+    store_name: "Vibhagan Stores",
+    store_address: {
+      postalCode: 700055,
+      address: "136, Jessore Road",
+      city: "Kolkata",
+      state: "West Bengal",
+      country: "India"
+    },
+    store_distance: 1610,
+    store_contact_number: 8010101010,
+    operationalHours: {
+      open24hours: true,
+      start_time: "00:00",
+      end_time: "23:59"
+    },
+    geoPoint: {
+      latitude: 83.67,
+      longitude: 98.45
+    },
+    timeZone: "IST",
+    OnlineAvailable: true
+  }, 
+  {
+    store_id: 2,
+    store_name: "Selegram Stores",
+    store_address: {
+      postalCode: 700075,
+      address: "138, Jessore Road",
+      city: "Kolkata",
+      state: "West Bengal",
+      country: "India"
+    },
+    store_distance: 810,
+    store_contact_number: 8010101210,
+    operationalHours: {
+      open24hours: false,
+      start_time: "00:00",
+      end_time: "23:59"
+    },
+    geoPoint: {
+      latitude: 83.67,
+      longitude: 98.45
+    },
+    timeZone: "IST",
+    OnlineAvailable: false
+  }, 
+  {
+    store_id: 3,
+    store_name: "Shambhu Stores",
+    store_address: {
+      postalCode: 700055,
+      address: "136, Jessore Road",
+      city: "Kolkata",
+      state: "West Bengal",
+      country: "India"
+    },
+    store_distance: 410,
+    store_contact_number: 8010101010,
+    operationalHours: {
+      open24hours: false,
+      start_time: "00:00",
+      end_time: "23:59"
+    },
+    geoPoint: {
+      latitude: 83.67,
+      longitude: 98.45
+    },
+    timeZone: "IST",
+    OnlineAvailable: false
+  }, 
+  {
+    store_id: 4,
+    store_name: "Radha Stores",
+    store_address: {
+      postalCode: 700075,
+      address: "138, Jessore Road",
+      city: "Kolkata",
+      state: "West Bengal",
+      country: "India"
+    },
+    store_distance: 1010,
+    store_contact_number: 8010101210,
+    operationalHours: {
+      open24hours: true,
+      start_time: "00:00",
+      end_time: "23:59"
+    },
+    geoPoint: {
+      latitude: 83.67,
+      longitude: 98.45
+    },
+    timeZone: "IST",
+    OnlineAvailable: true
+  }
+]]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<set-variable value="#[attributes.queryParams.postalcode]" doc:name="postalcode" doc:id="1837f4b5-6d9e-4303-a519-3853507b0fbe" variableName="postalcode"/>
+		<choice doc:name="Choice" doc:id="ccf818c9-191d-4272-ace7-2ed959d05bd2" >
+			<when expression="#[vars.postalcode != null]">
+				<ee:transform doc:name="Transform Message" doc:id="b2158fe3-df3f-479f-b8b4-8654d16388a6">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload filter ($.operationalHours.open24hours==true) orderBy $.store_distance]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="c468adbd-33c6-428a-b25d-3d9dbd78e512">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	store_id: payload[0].store_id,
+    store_name: payload[0].store_name,
+    store_address: payload[0].store_address.address  ++ ", " ++ payload[0].store_address.city ++ ", " ++ payload[0].store_address.state ++ ", " ++ payload[0].store_address.country ++ " (" ++ payload[0].store_address.postalCode ++ ")" as String,
+    store_distance: payload[0].store_distance,
+    store_contact_number: payload[0].store_contact_number,
+    operationalHours: payload[0].operationalHours,
+    geoPoint: payload[0].geoPoint,
+    timeZone: payload[0].timeZone,
+    OnlineAvailable: payload[0].OnlineAvailable
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="4a11b603-e48d-43ca-9135-8a70ad57b108" message="No postal code given"/>
+			</otherwise>
+		</choice>
+    </flow>
+    <flow name="get:\stores\list-preffered:walmart-config">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    store_id: 1,
+    store_name: "Vibhagan Stores",
+    store_address: {
+      postalCode: 700055,
+      address: "136, Jessore Road",
+      city: "Kolkata",
+      state: "West Bengal",
+      country: "India"
+    },
+    store_distance: 610,
+    store_contact_number: 8010101010,
+    operationalHours: {
+      open24hours: true,
+      start_time: "00:00",
+      end_time: "23:59"
+    },
+    geoPoint: {
+      latitude: 83.67,
+      longitude: 98.45
+    },
+    timeZone: "IST",
+    OnlineAvailable: true
+  }, 
+  {
+    store_id: 2,
+    store_name: "Selegram Stores",
+    store_address: {
+      postalCode: 700075,
+      address: "138, Jessore Road",
+      city: "Kolkata",
+      state: "West Bengal",
+      country: "India"
+    },
+    store_distance: 810,
+    store_contact_number: 8010101210,
+    operationalHours: {
+      open24hours: false,
+      start_time: "00:00",
+      end_time: "23:59"
+    },
+    geoPoint: {
+      latitude: 83.67,
+      longitude: 98.45
+    },
+    timeZone: "IST",
+    OnlineAvailable: false
+  }, 
+  {
+    store_id: 3,
+    store_name: "Shambhu Stores",
+    store_address: {
+      postalCode: 700055,
+      address: "136, Jessore Road",
+      city: "Kolkata",
+      state: "West Bengal",
+      country: "India"
+    },
+    store_distance: 410,
+    store_contact_number: 8010101010,
+    operationalHours: {
+      open24hours: false,
+      start_time: "00:00",
+      end_time: "23:59"
+    },
+    geoPoint: {
+      latitude: 83.67,
+      longitude: 98.45
+    },
+    timeZone: "IST",
+    OnlineAvailable: false
+  }, 
+  {
+    store_id: 4,
+    store_name: "Radha Stores",
+    store_address: {
+      postalCode: 700075,
+      address: "138, Jessore Road",
+      city: "Kolkata",
+      state: "West Bengal",
+      country: "India"
+    },
+    store_distance: 1010,
+    store_contact_number: 8010101210,
+    operationalHours: {
+      open24hours: true,
+      start_time: "00:00",
+      end_time: "23:59"
+    },
+    geoPoint: {
+      latitude: 83.67,
+      longitude: 98.45
+    },
+    timeZone: "IST",
+    OnlineAvailable: true
+  }
+]]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="26f32f0b-fb60-45a2-bc0a-705bd3e3fcce" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter ($.OnlineAvailable==true)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+</mule>

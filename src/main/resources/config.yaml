@@ -1,0 +1,6 @@
+sql:
+  user: "c4ebatch5"
+  pass: "c4ebatch@5"
+  db: "testdbc45"
+  host: "db4free.net"
+  port: "3306"

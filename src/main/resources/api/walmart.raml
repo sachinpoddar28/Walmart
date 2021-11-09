@@ -1,0 +1,145 @@
+#%RAML 1.0
+title: Walmart
+
+protocols:
+  - HTTP
+
+version: 1.0
+
+mediaType: 
+- application/json
+
+description: This API is used to fetch the department and store details as per the product id.
+
+types:
+  product: !include DataType/productDataType.raml
+  return: !include DataType/returnDataType.raml
+  review: !include DataType/reviewDataType.raml
+  stores: !include DataType/storesDataType.raml
+  departmentlist: !include DataType/departmentDataType.raml
+  productType: !include DataType/productTypeDataType.raml
+  productDescription: !include /DataType/productDescription.raml
+
+traits:
+  headerAndError: !include Traits/responseTrait.raml
+
+/departments/list:
+  get:
+    description: It will return the list of departments like grocery, medicines
+    is: headerAndError
+    responses:
+      200:
+        body:
+          application/json:
+            type: departmentlist
+            example: !include Examples/departmentListExample.raml      
+    
+/products/get-details:
+  get:
+    description: It will return the product details provided the product id as query parameter 
+    is: headerAndError
+    queryParameters:
+      usItemId:
+        type: integer
+        example: 1234
+    responses:
+      200:
+        body:
+          application/json:
+            type: product[]
+            example: !include Examples/productExample.raml
+    
+/products/get-description:
+  get:
+    description: It will return the product description as per the product id provided
+    is:
+      - headerAndError
+    queryParameters:
+      usItemId: 
+        type: integer
+        example: 1234
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include Examples/productDescription.raml
+              
+/products/list:
+  get:
+    description: It will return the list of product available in specific store
+    is:
+      - headerAndError
+    queryParameters:
+      storeId: 
+        type: integer
+        example: 1234
+    responses:
+      200:
+        body:
+          application/json:
+            type: productType
+            example: !include Examples/productTypeExample.raml
+
+/products/get-return-policy:
+  get:
+    description: It will return the return policy for a particulat product id
+    is:
+      - headerAndError
+    queryParameters:
+      usItemId: 
+        type: integer
+        example: 1234
+    responses:
+      200:
+        body:
+          application/json:
+            type: return
+            example: !include Examples/returnExample.raml
+          
+/stores/list:
+  get:
+    description: It will return the list of stores near the postal code provided
+    is:
+      - headerAndError
+    queryParameters:
+      postalcode: 
+        type: integer
+        required: false
+        example: 700054
+    responses:
+      200:
+        body:
+          application/json:
+            type: stores[]
+            examples: !include Examples/storesExample.raml     
+    
+/stores/list-preffered:
+  get:
+    description: It will return the list of stores near the postal code which are also available online
+    is:
+      - headerAndError
+    queryParameters:
+      postalcode: 
+        type: integer
+        required: false
+        example: 700054
+    responses:
+      200:
+        body:
+          application/json:
+            type: stores[]
+            examples: !include Examples/storesExample.raml
+    
+/reviews/list:
+  get:
+    description: It will return the customer reviews as per the product id given
+    is:
+      - headerAndError
+    queryParameters:
+      usItemId: number
+    responses:
+      200:
+        body:
+          application/json:
+            type: review
+            example: !include Examples/reviewExample.raml
