@@ -7,7 +7,6 @@ http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/m
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
     <apikit:config name="walmart-config" api="walmart.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <api-gateway:autodiscovery apiId="17413033" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="1db9f655-04f3-49d1-9c74-632b84bcc344" flowRef="walmart-main" />
 	<flow name="walmart-main">
         <http:listener config-ref="walmart-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
