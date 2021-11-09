@@ -26,6 +26,6 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 }]]]></db:input-parameters>
 		</db:insert>
 		<set-payload value='#["Values inserted successfully. Your UID is 1"]' doc:name="Set Payload" doc:id="d89b5872-a543-4b23-a67c-ae7dcf3afbb5" />
-		<logger level="INFO" doc:name="Logger" doc:id="fd2f4b3c-6ffa-4c9f-908c-9f6259049dda" />
+		<logger level="INFO" doc:name="Logger" doc:id="fd2f4b3c-6ffa-4c9f-908c-9f6259049dda" message="#[payload]"/>
 	</flow>
 </mule>
