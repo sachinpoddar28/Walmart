@@ -1,0 +1,101 @@
+%dw 2.0
+import * from dw::test::Asserts
+---
+payload must equalTo([
+  {
+    "store_id": 1,
+    "store_name": "Vibhagan Stores",
+    "store_address": {
+      "postalCode": 700055,
+      "address": "136, Jessore Road",
+      "city": "Kolkata",
+      "state": "West Bengal",
+      "country": "India"
+    },
+    "store_distance": 1610,
+    "store_contact_number": 8010101010,
+    "operationalHours": {
+      "open24hours": true,
+      "start_time": "00:00",
+      "end_time": "23:59"
+    },
+    "geoPoint": {
+      "latitude": 83.67,
+      "longitude": 98.45
+    },
+    "timeZone": "IST",
+    "OnlineAvailable": true
+  },
+  {
+    "store_id": 2,
+    "store_name": "Selegram Stores",
+    "store_address": {
+      "postalCode": 700075,
+      "address": "138, Jessore Road",
+      "city": "Kolkata",
+      "state": "West Bengal",
+      "country": "India"
+    },
+    "store_distance": 810,
+    "store_contact_number": 8010101210,
+    "operationalHours": {
+      "open24hours": false,
+      "start_time": "00:00",
+      "end_time": "23:59"
+    },
+    "geoPoint": {
+      "latitude": 83.67,
+      "longitude": 98.45
+    },
+    "timeZone": "IST",
+    "OnlineAvailable": false
+  },
+  {
+    "store_id": 3,
+    "store_name": "Shambhu Stores",
+    "store_address": {
+      "postalCode": 700055,
+      "address": "136, Jessore Road",
+      "city": "Kolkata",
+      "state": "West Bengal",
+      "country": "India"
+    },
+    "store_distance": 410,
+    "store_contact_number": 8010101010,
+    "operationalHours": {
+      "open24hours": false,
+      "start_time": "00:00",
+      "end_time": "23:59"
+    },
+    "geoPoint": {
+      "latitude": 83.67,
+      "longitude": 98.45
+    },
+    "timeZone": "IST",
+    "OnlineAvailable": false
+  },
+  {
+    "store_id": 4,
+    "store_name": "Radha Stores",
+    "store_address": {
+      "postalCode": 700075,
+      "address": "138, Jessore Road",
+      "city": "Kolkata",
+      "state": "West Bengal",
+      "country": "India"
+    },
+    "store_distance": 1010,
+    "store_contact_number": 8010101210,
+    "operationalHours": {
+      "open24hours": true,
+      "start_time": "00:00",
+      "end_time": "23:59"
+    },
+    "geoPoint": {
+      "latitude": 83.67,
+      "longitude": 98.45
+    },
+    "timeZone": "IST",
+    "OnlineAvailable": true
+  }
+])
